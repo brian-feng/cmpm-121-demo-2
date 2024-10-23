@@ -11,24 +11,34 @@ canvas.width = 256;
 app.appendChild(canvas);
 
 const context = canvas.getContext("2d");
-const cursor = {active: false, x: 0, y: 0};
+let mouseDown = false;
+
+const mousePoints: number[][] = [];
 canvas.addEventListener("mousedown", (e) => {
-    cursor.active = true;
-    cursor.x = e.offsetX;
-    cursor.y = e.offsetY;
+    mouseDown = true;
+    mousePoints.push([e.offsetX, e.offsetY]);
 });
 
 canvas.addEventListener("mousemove", (e) => {
-    if(cursor.active && context){
-        context.beginPath()
-        context.moveTo(cursor.x, cursor.y);
-        context.lineTo(e.offsetX, e.offsetY);
-        context.stroke();
-        cursor.x = e.offsetX;
-        cursor.y = e.offsetY;
+    if(mouseDown){
+        mousePoints.push([e.offsetX, e.offsetY]);
     }
 });
 
-canvas.addEventListener("mouseup", (e) => {
-    cursor.active = false;
+canvas.addEventListener("mouseup", () => {
+    mouseDown = false;
+    canvas.dispatchEvent(new Event("drawing-changed"));
+});
+
+canvas.addEventListener("drawing-changed", () => {
+    if(context){
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        for(let i = 0; i < mousePoints.length - 1; i++){
+            context.beginPath();
+            context.moveTo(mousePoints[i][0], mousePoints[i][1]);
+            context.lineTo(mousePoints[i+1][0], mousePoints[i+1][1]);
+            context.stroke();
+            console.log(mousePoints[i][0], mousePoints[i][1]);
+        }
+    }
 });
