@@ -50,7 +50,21 @@ canvas.addEventListener("drawing-changed", () => {
             context.moveTo(mousePoints[i][0], mousePoints[i][1]);
             context.lineTo(mousePoints[i+1][0], mousePoints[i+1][1]);
             context.stroke();
-            console.log(mousePoints[i][0], mousePoints[i][1]);
         }
+    }
+});
+
+const drawingStack: number[][] = [];
+undoButton.addEventListener("click", () => {
+    if(mousePoints.length > 0){
+        drawingStack.push(mousePoints.pop()!);
+        canvas.dispatchEvent(new Event("drawing-changed"));
+    }
+});
+
+redoButton.addEventListener("click", () => {
+    if(drawingStack.length > 0){
+        mousePoints.push(drawingStack.pop()!);
+        canvas.dispatchEvent(new Event("drawing-changed"));
     }
 });
