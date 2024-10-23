@@ -9,6 +9,18 @@ const canvas = document.createElement("canvas");
 canvas.height = 256;
 canvas.width = 256;
 app.appendChild(canvas);
+const spacer = document.createElement("div");
+spacer.style.marginTop = "15px";
+app.append(spacer);
+
+const undoButton = document.createElement("button");
+const redoButton = document.createElement("button");
+undoButton.textContent = "Undo";
+redoButton.textContent = "Redo";
+undoButton.style.marginRight = "10px";
+undoButton.style.marginLeft = "10px";
+app.append(undoButton);
+app.append(redoButton);
 
 const context = canvas.getContext("2d");
 let mouseDown = false;
