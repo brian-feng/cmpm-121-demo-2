@@ -32,6 +32,8 @@ const thickButton = document.createElement("button");
 thinButton.textContent = "Thin Brush";
 thickButton.textContent = "Thick Brush";
 thickButton.style.marginLeft = "10px";
+thinButton.classList.add("selected-button");
+thinButton.classList.remove("button");
 app.append(thinButton);
 app.append(thickButton);
 
@@ -109,8 +111,16 @@ redoButton.addEventListener("click", () => {
 
 thinButton.addEventListener("click", () => {
     currentThickness = 1;
+    thinButton.classList.remove("button");
+    thinButton.classList.add("selected-button");
+    thickButton.classList.remove("selected-button");
+    thickButton.classList.add("button");
 });
 
 thickButton.addEventListener("click", () => {
     currentThickness = 5;
+    thinButton.classList.remove("selected-button");
+    thinButton.classList.add("button");
+    thickButton.classList.remove("button");
+    thickButton.classList.add("selected-button");
 });
