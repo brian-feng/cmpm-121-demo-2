@@ -124,8 +124,9 @@ class StickerCommand implements Command {
 
     display(ctx: CanvasRenderingContext2D){
         if (ctx) {
+            console.log(this.x, this.y);
             ctx.font = '20px Arial';
-            ctx.fillText(this.sticker, this.x, this.y);
+            ctx.fillText(this.sticker, this.x-10, this.y+10);
         }
     }
 
@@ -135,12 +136,51 @@ class StickerCommand implements Command {
     }
 }
 
-const commands: Command[] = [new MouseCommand(0, 0, currentThickness)];
+class drawStickerCommand implements Command {
+    x: number;
+    y: number;
+    sticker: string;
+    ctx: CanvasRenderingContext2D;
+
+    constructor(x: number, y: number, sticker: string, ctx: CanvasRenderingContext2D){
+        this.x = x;
+        this.y = y;
+        this.sticker = sticker
+        this.ctx = ctx;
+    }
+
+    display(ctx: CanvasRenderingContext2D){
+        if (ctx) {
+            ctx.font = '20px Arial';
+            ctx.fillText(this.sticker, this.x-10, this.y+10);
+        }
+    }
+
+    drag(x: number, y: number){
+        this.x = x;
+        this.y = y;
+        this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        this.ctx.font = '20px Arial';
+        this.ctx.fillText(this.sticker, this.x-10, this.y+10);
+    }
+}
+
+const commands: Command[] = [new MouseCommand(0, 0, currentThickness), new drawStickerCommand(-100, -100, "🎃", context!), new drawStickerCommand(-100, -100, "👻", context!), new drawStickerCommand(-100, -100, "🧟", context!)];
 const redoCommands: Command[] = [];
+let cursor = commands[0];
 
 canvas.addEventListener("mousedown", (e) => {
     mouseDown = true;
-    commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness));
+    if(commands[0].constructor.name === "MouseCommand"){
+        commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness));
+    }
+    else if(commands[0].constructor.name === "StickerCommand"){
+        for(let i = 0; i < commands.length; i++){
+            if(commands[i].constructor.name === "drawStickerCommand" && (commands[i] as drawStickerCommand).sticker == (cursor as StickerCommand).sticker){
+                commands[i].drag(e.offsetX, e.offsetY);
+            }
+        }
+    }
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -157,12 +197,13 @@ canvas.addEventListener("mouseup", () => {
 });
 
 canvas.addEventListener("mouseleave", () => {
+    cursor = commands[0];
     commands.shift();
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
 canvas.addEventListener("mouseenter", () => {
-    commands.unshift(new MouseCommand(0, 0, currentThickness));
+    commands.unshift(cursor);
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
@@ -205,6 +246,7 @@ thinButton.addEventListener("click", () => {
     currentThickness = 1;
     commands.shift();
     commands.unshift(new MouseCommand(0, 0, currentThickness));
+    cursor = commands[0];
     unselectButtons();
     thinButton.classList.remove("button");
     thinButton.classList.add("selected-button");
@@ -214,6 +256,7 @@ thickButton.addEventListener("click", () => {
     currentThickness = 5;
     commands.shift();
     commands.unshift(new MouseCommand(0, 0, currentThickness));
+    cursor = commands[0];
     unselectButtons();
     thickButton.classList.remove("button");
     thickButton.classList.add("selected-button");
@@ -222,6 +265,7 @@ thickButton.addEventListener("click", () => {
 pumpkinButton.addEventListener("click", () => {
     commands.shift();
     commands.unshift(new StickerCommand(0, 0, "🎃"));
+    cursor = commands[0];
     unselectButtons();
     pumpkinButton.classList.remove("button");
     pumpkinButton.classList.add("selected-button");
@@ -230,6 +274,7 @@ pumpkinButton.addEventListener("click", () => {
 ghostButton.addEventListener("click", () => {
     commands.shift();
     commands.unshift(new StickerCommand(0, 0, "👻"));
+    cursor = commands[0];
     unselectButtons();
     ghostButton.classList.remove("button");
     ghostButton.classList.add("selected-button");
@@ -238,6 +283,7 @@ ghostButton.addEventListener("click", () => {
 zombieButton.addEventListener("click", () => {
     commands.shift();
     commands.unshift(new StickerCommand(0, 0, "🧟"));
+    cursor = commands[0];
     unselectButtons();
     zombieButton.classList.remove("button");
     zombieButton.classList.add("selected-button");
