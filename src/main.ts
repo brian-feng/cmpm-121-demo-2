@@ -20,24 +20,41 @@ const redoButton = document.createElement("button");
 undoButton.textContent = "Undo";
 redoButton.textContent = "Redo";
 undoButton.style.marginRight = "10px";
-undoButton.style.marginLeft = "10px";
 app.append(undoButton);
 app.append(redoButton);
+const spacer2 = document.createElement("div");
+spacer2.style.marginTop = "15px";
+app.append(spacer2);
+
+// Set up the brush buttons
+const thinButton = document.createElement("button");
+const thickButton = document.createElement("button");
+thinButton.textContent = "Thin Brush";
+thickButton.textContent = "Thick Brush";
+thickButton.style.marginLeft = "10px";
+app.append(thinButton);
+app.append(thickButton);
 
 const context = canvas.getContext("2d");
+
 let mouseDown = false;
+let currentThickness = 1;
 
 const commands: DrawCommand[] = [];
 const redoCommands: DrawCommand[] = [];
 
 class DrawCommand {
     points: {x: number, y: number}[];
-    
-    constructor(x: number, y: number){
+    thickness: number;
+
+    constructor(x: number, y: number, thickness: number){
         this.points = [{x, y}];
+        this.thickness = thickness
     }
 
     display(ctx: CanvasRenderingContext2D){
+        ctx.lineWidth = this.thickness;
+        ctx.beginPath();
         const {x, y} = this.points[0];
         ctx.moveTo(x, y);
         for(const {x, y} of this.points){
@@ -53,7 +70,7 @@ class DrawCommand {
 
 canvas.addEventListener("mousedown", (e) => {
     mouseDown = true;
-    commands.push(new DrawCommand(e.offsetX, e.offsetY));
+    commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness));
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -88,4 +105,12 @@ redoButton.addEventListener("click", () => {
         commands.push(redoCommands.pop()!);
         canvas.dispatchEvent(new Event("drawing-changed"));
     }
+});
+
+thinButton.addEventListener("click", () => {
+    currentThickness = 1;
+});
+
+thickButton.addEventListener("click", () => {
+    currentThickness = 5;
 });
