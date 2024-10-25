@@ -25,15 +25,38 @@ app.append(redoButton);
 const context = canvas.getContext("2d");
 let mouseDown = false;
 
-const mousePoints: number[][] = [];
+const commands: DrawCommand[] = [];
+const redoCommands: DrawCommand[] = [];
+
+class DrawCommand {
+    points: {x: number, y: number}[];
+    
+    constructor(x: number, y: number){
+        this.points = [{x, y}];
+    }
+
+    display(ctx: CanvasRenderingContext2D){
+        const {x, y} = this.points[0];
+        ctx.moveTo(x, y);
+        for(const {x, y} of this.points){
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    drag(x: number, y: number){
+        this.points.push({x, y});
+    }
+}
+
 canvas.addEventListener("mousedown", (e) => {
     mouseDown = true;
-    mousePoints.push([e.offsetX, e.offsetY]);
+    commands.push(new DrawCommand(e.offsetX, e.offsetY));
 });
 
 canvas.addEventListener("mousemove", (e) => {
     if(mouseDown){
-        mousePoints.push([e.offsetX, e.offsetY]);
+        commands[commands.length-1].drag(e.offsetX, e.offsetY);
     }
 });
 
@@ -45,26 +68,22 @@ canvas.addEventListener("mouseup", () => {
 canvas.addEventListener("drawing-changed", () => {
     if(context){
         context.clearRect(0, 0, canvas.width, canvas.height);
-        for(let i = 0; i < mousePoints.length - 1; i++){
-            context.beginPath();
-            context.moveTo(mousePoints[i][0], mousePoints[i][1]);
-            context.lineTo(mousePoints[i+1][0], mousePoints[i+1][1]);
-            context.stroke();
+        for(let i = 0; i < commands.length; i++){
+            commands[i].display(context);
         }
     }
 });
 
-const drawingStack: number[][] = [];
 undoButton.addEventListener("click", () => {
-    if(mousePoints.length > 0){
-        drawingStack.push(mousePoints.pop()!);
+    if(commands.length > 0){
+        redoCommands.push(commands.pop()!);
         canvas.dispatchEvent(new Event("drawing-changed"));
     }
 });
 
 redoButton.addEventListener("click", () => {
-    if(drawingStack.length > 0){
-        mousePoints.push(drawingStack.pop()!);
+    if(redoCommands.length > 0){
+        commands.push(redoCommands.pop()!);
         canvas.dispatchEvent(new Event("drawing-changed"));
     }
 });
