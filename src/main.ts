@@ -42,10 +42,34 @@ const context = canvas.getContext("2d");
 let mouseDown = false;
 let currentThickness = 1;
 
-const commands: DrawCommand[] = [];
-const redoCommands: DrawCommand[] = [];
+interface Command {
+    thickness: number;
+    display(ctx: CanvasRenderingContext2D): void;
+    drag(x: number, y: number): void;
+}
 
-class DrawCommand {
+class MouseCommand implements Command{
+    x: number;
+    y: number;
+    thickness: number;
+    constructor(x: number, y: number, thickness: number){
+        this.x = x;
+        this.y = y;
+        this.thickness = thickness;
+    }
+
+    display(ctx: CanvasRenderingContext2D){
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.thickness, 0, 2*Math.PI);
+        ctx.fill();
+    }
+    drag(x: number, y: number){
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class DrawCommand implements Command{
     points: {x: number, y: number}[];
     thickness: number;
 
@@ -70,6 +94,9 @@ class DrawCommand {
     }
 }
 
+const commands: Command[] = [new MouseCommand(0, 0, currentThickness)];
+const redoCommands: Command[] = [];
+
 canvas.addEventListener("mousedown", (e) => {
     mouseDown = true;
     commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness));
@@ -79,6 +106,8 @@ canvas.addEventListener("mousemove", (e) => {
     if(mouseDown){
         commands[commands.length-1].drag(e.offsetX, e.offsetY);
     }
+    commands[0].drag(e.offsetX, e.offsetY);
+    canvas.dispatchEvent(new Event("tool-moved"));
 });
 
 canvas.addEventListener("mouseup", () => {
@@ -95,6 +124,9 @@ canvas.addEventListener("drawing-changed", () => {
     }
 });
 
+canvas.addEventListener("tool-moved", () => {
+    canvas.dispatchEvent(new Event("drawing-changed"));
+});
 undoButton.addEventListener("click", () => {
     if(commands.length > 0){
         redoCommands.push(commands.pop()!);
@@ -111,6 +143,7 @@ redoButton.addEventListener("click", () => {
 
 thinButton.addEventListener("click", () => {
     currentThickness = 1;
+    commands[0].thickness = currentThickness
     thinButton.classList.remove("button");
     thinButton.classList.add("selected-button");
     thickButton.classList.remove("selected-button");
@@ -119,6 +152,7 @@ thinButton.addEventListener("click", () => {
 
 thickButton.addEventListener("click", () => {
     currentThickness = 5;
+    commands[0].thickness = currentThickness
     thinButton.classList.remove("selected-button");
     thinButton.classList.add("button");
     thickButton.classList.remove("button");
