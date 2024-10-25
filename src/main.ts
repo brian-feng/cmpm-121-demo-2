@@ -36,6 +36,22 @@ thinButton.classList.add("selected-button");
 thinButton.classList.remove("button");
 app.append(thinButton);
 app.append(thickButton);
+const spacer3 = document.createElement("div");
+spacer3.style.marginTop = "15px";
+app.append(spacer3);
+
+// Set up the sticker buttons
+const pumpkinButton = document.createElement("button");
+const ghostButton = document.createElement("button");
+const zombieButton = document.createElement("button")
+pumpkinButton.textContent = "🎃";
+ghostButton.textContent = "👻";
+zombieButton.textContent = "🧟";
+ghostButton.style.marginLeft = "10px";
+zombieButton.style.marginLeft = "10px";
+app.append(pumpkinButton); 
+app.append(ghostButton);
+app.append(zombieButton);
 
 const context = canvas.getContext("2d");
 
@@ -43,7 +59,6 @@ let mouseDown = false;
 let currentThickness = 1;
 
 interface Command {
-    thickness: number;
     display(ctx: CanvasRenderingContext2D): void;
     drag(x: number, y: number): void;
 }
@@ -52,6 +67,7 @@ class MouseCommand implements Command{
     x: number;
     y: number;
     thickness: number;
+
     constructor(x: number, y: number, thickness: number){
         this.x = x;
         this.y = y;
@@ -63,6 +79,7 @@ class MouseCommand implements Command{
         ctx.arc(this.x, this.y, this.thickness, 0, 2*Math.PI);
         ctx.fill();
     }
+
     drag(x: number, y: number){
         this.x = x;
         this.y = y;
@@ -94,7 +111,31 @@ class DrawCommand implements Command{
     }
 }
 
-let commands: Command[] = [new MouseCommand(0, 0, currentThickness)];
+class StickerCommand implements Command {
+    x: number;
+    y: number;
+    sticker: string;
+
+    constructor(x: number, y: number, sticker: string){
+        this.x = x;
+        this.y = y;
+        this.sticker = sticker
+    }
+
+    display(ctx: CanvasRenderingContext2D){
+        if (ctx) {
+            ctx.font = '20px Arial';
+            ctx.fillText(this.sticker, this.x, this.y);
+        }
+    }
+
+    drag(x: number, y: number){
+        this.x = x;
+        this.y = y;
+    }
+}
+
+const commands: Command[] = [new MouseCommand(0, 0, currentThickness)];
 const redoCommands: Command[] = [];
 
 canvas.addEventListener("mousedown", (e) => {
@@ -116,7 +157,7 @@ canvas.addEventListener("mouseup", () => {
 });
 
 canvas.addEventListener("mouseleave", () => {
-    commands = commands.slice(1);
+    commands.shift();
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
@@ -137,6 +178,7 @@ canvas.addEventListener("drawing-changed", () => {
 canvas.addEventListener("tool-moved", () => {
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
+
 undoButton.addEventListener("click", () => {
     if(commands.length > 0){
         redoCommands.push(commands.pop()!);
@@ -151,20 +193,52 @@ redoButton.addEventListener("click", () => {
     }
 });
 
+const buttons = [thinButton, thickButton, pumpkinButton, ghostButton, zombieButton];
+function unselectButtons(){
+    for(const button of buttons){
+        button.classList.remove("selected-button");
+        button.classList.add("button");
+    }
+}
+
 thinButton.addEventListener("click", () => {
     currentThickness = 1;
-    commands[0].thickness = currentThickness
+    commands.shift();
+    commands.unshift(new MouseCommand(0, 0, currentThickness));
+    unselectButtons();
     thinButton.classList.remove("button");
     thinButton.classList.add("selected-button");
-    thickButton.classList.remove("selected-button");
-    thickButton.classList.add("button");
 });
 
 thickButton.addEventListener("click", () => {
     currentThickness = 5;
-    commands[0].thickness = currentThickness
-    thinButton.classList.remove("selected-button");
-    thinButton.classList.add("button");
+    commands.shift();
+    commands.unshift(new MouseCommand(0, 0, currentThickness));
+    unselectButtons();
     thickButton.classList.remove("button");
     thickButton.classList.add("selected-button");
+});
+
+pumpkinButton.addEventListener("click", () => {
+    commands.shift();
+    commands.unshift(new StickerCommand(0, 0, "🎃"));
+    unselectButtons();
+    pumpkinButton.classList.remove("button");
+    pumpkinButton.classList.add("selected-button");
+});
+
+ghostButton.addEventListener("click", () => {
+    commands.shift();
+    commands.unshift(new StickerCommand(0, 0, "👻"));
+    unselectButtons();
+    ghostButton.classList.remove("button");
+    ghostButton.classList.add("selected-button");
+});
+
+zombieButton.addEventListener("click", () => {
+    commands.shift();
+    commands.unshift(new StickerCommand(0, 0, "🧟"));
+    unselectButtons();
+    zombieButton.classList.remove("button");
+    zombieButton.classList.add("selected-button");
 });
