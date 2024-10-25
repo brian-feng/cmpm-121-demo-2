@@ -57,6 +57,7 @@ const context = canvas.getContext("2d");
 
 let mouseDown = false;
 let currentThickness = 1;
+let mouseInScreen = 0;
 
 interface Command {
     display(ctx: CanvasRenderingContext2D): void;
@@ -197,20 +198,20 @@ canvas.addEventListener("mouseup", () => {
 });
 
 canvas.addEventListener("mouseleave", () => {
-    cursor = commands[0];
-    commands.shift();
+    mouseInScreen = 0;
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
 canvas.addEventListener("mouseenter", () => {
-    commands.unshift(cursor);
+    mouseInScreen = 1;
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
 canvas.addEventListener("drawing-changed", () => {
+    console.log(mouseInScreen);
     if(context){
         context.clearRect(0, 0, canvas.width, canvas.height);
-        for(let i = 0; i < commands.length; i++){
+        for(let i = 1-mouseInScreen; i < commands.length; i++){
             commands[i].display(context);
         }
     }
