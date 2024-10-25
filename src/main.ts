@@ -94,7 +94,7 @@ class DrawCommand implements Command{
     }
 }
 
-const commands: Command[] = [new MouseCommand(0, 0, currentThickness)];
+let commands: Command[] = [new MouseCommand(0, 0, currentThickness)];
 const redoCommands: Command[] = [];
 
 canvas.addEventListener("mousedown", (e) => {
@@ -112,6 +112,16 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseup", () => {
     mouseDown = false;
+    canvas.dispatchEvent(new Event("drawing-changed"));
+});
+
+canvas.addEventListener("mouseleave", () => {
+    commands = commands.slice(1);
+    canvas.dispatchEvent(new Event("drawing-changed"));
+});
+
+canvas.addEventListener("mouseenter", () => {
+    commands.unshift(new MouseCommand(0, 0, currentThickness));
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
