@@ -5,6 +5,7 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 document.title = "Sketchpad";
 app.innerHTML = "<h1>Sketchpad</h1>";
 
+// Set up the canvas
 const canvas = document.createElement("canvas");
 canvas.height = 256;
 canvas.width = 256;
@@ -13,6 +14,7 @@ const spacer = document.createElement("div");
 spacer.style.marginTop = "15px";
 app.append(spacer);
 
+// Set up the undo and redo buttons
 const undoButton = document.createElement("button");
 const redoButton = document.createElement("button");
 undoButton.textContent = "Undo";
