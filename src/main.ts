@@ -170,11 +170,11 @@ const redoCommands: Command[] = [];
 let cursor = commands[0];
 
 canvas.addEventListener("mousedown", (e) => {
-    mouseDown = true;
-    if(commands[0].constructor.name === "MouseCommand"){
+    if(cursor.constructor.name === "MouseCommand"){
+        mouseDown = true;
         commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness));
     }
-    else if(commands[0].constructor.name === "StickerCommand"){
+    else if(cursor.constructor.name === "StickerCommand"){
         for(let i = 0; i < commands.length; i++){
             if(commands[i].constructor.name === "drawStickerCommand" && (commands[i] as drawStickerCommand).sticker == (cursor as StickerCommand).sticker){
                 commands[i].drag(e.offsetX, e.offsetY);
