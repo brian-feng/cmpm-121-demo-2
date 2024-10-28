@@ -59,6 +59,11 @@ generateSpacer()
 const customButton = document.createElement("button");
 customButton.textContent = "Import Custom Sticker";
 app.append(customButton);
+generateSpacer();
+
+const exportButton = document.createElement("button");
+exportButton.textContent = "Export";
+app.append(exportButton);
 
 const context = canvas.getContext("2d");
 
@@ -311,5 +316,22 @@ customButton.addEventListener("click", () => {
         unselectButtons();
         customButton.classList.remove("button");
         customButton.classList.add("selected-button");
+    }
+});
+
+exportButton.addEventListener("click", () => {
+    if(context){
+        const temp = document.createElement("canvas");
+        temp.height = 1024;
+        temp.width = 1024;
+        context.scale(4, 4);
+        const tempContext: CanvasRenderingContext2D = temp.getContext("2d")!;
+        for(let i = 1-mouseInScreen; i < commands.length; i++){
+            commands[i].display(tempContext);
+        }
+        const anchor = document.createElement("a");
+        anchor.href = canvas.toDataURL("image/png");
+        anchor.download = "sketchpad.png";
+        anchor.click();
     }
 });
