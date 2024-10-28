@@ -2,8 +2,8 @@ import "./style.css";
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 
-document.title = "Sketchpad";
-app.innerHTML = "<h1>Sketchpad</h1>";
+document.title = "Goon Squad";
+app.innerHTML = "<h1>Goon Squad</h1>";
 
 function generateSpacer(): HTMLDivElement {
     const spacer = document.createElement("div");
@@ -57,7 +57,7 @@ generateSpacer()
 
 // Set up the custom sticker button
 const customButton = document.createElement("button");
-customButton.textContent = "Import Custom Sticker";
+customButton.textContent = "Import Custom Goon";
 app.append(customButton);
 generateSpacer();
 
@@ -334,7 +334,7 @@ exportButton.addEventListener("click", () => {
         }
         const anchor = document.createElement("a");
         anchor.href = tempCanvas.toDataURL("image/png");
-        anchor.download = "sketchpad.png";
+        anchor.download = "goonsquad.png";
         anchor.click();
     }
 });
