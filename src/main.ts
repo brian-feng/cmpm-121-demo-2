@@ -52,6 +52,13 @@ zombieButton.style.marginLeft = "10px";
 app.append(pumpkinButton); 
 app.append(ghostButton);
 app.append(zombieButton);
+const spacer4 = document.createElement("div");
+spacer4.style.marginTop = "15px";
+app.append(spacer4);
+
+const customButton = document.createElement("button");
+customButton.textContent = "Import Custom Sticker";
+app.append(customButton);
 
 const context = canvas.getContext("2d");
 
@@ -166,7 +173,7 @@ class drawStickerCommand implements Command {
     }
 }
 
-const commands: Command[] = [new MouseCommand(0, 0, currentThickness), new drawStickerCommand(-100, -100, "🎃", context!), new drawStickerCommand(-100, -100, "👻", context!), new drawStickerCommand(-100, -100, "🧟", context!)];
+const commands: Command[] = [new MouseCommand(0, 0, currentThickness)];
 const redoCommands: Command[] = [];
 let cursor = commands[0];
 
@@ -176,10 +183,15 @@ canvas.addEventListener("mousedown", (e) => {
         commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness));
     }
     else if(cursor.constructor.name === "StickerCommand"){
+        let found = false;
         for(let i = 0; i < commands.length; i++){
             if(commands[i].constructor.name === "drawStickerCommand" && (commands[i] as drawStickerCommand).sticker == (cursor as StickerCommand).sticker){
                 commands[i].drag(e.offsetX, e.offsetY);
+                found = true;
             }
+        }
+        if(!found){
+            commands.push(new drawStickerCommand(e.offsetX, e.offsetY, (cursor as StickerCommand).sticker, context!));
         }
     }
 });
@@ -235,7 +247,7 @@ redoButton.addEventListener("click", () => {
     }
 });
 
-const buttons = [thinButton, thickButton, pumpkinButton, ghostButton, zombieButton];
+const buttons = [thinButton, thickButton, pumpkinButton, ghostButton, zombieButton, customButton];
 function unselectButtons(){
     for(const button of buttons){
         button.classList.remove("selected-button");
@@ -288,4 +300,16 @@ zombieButton.addEventListener("click", () => {
     unselectButtons();
     zombieButton.classList.remove("button");
     zombieButton.classList.add("selected-button");
+});
+
+customButton.addEventListener("click", () => {
+    const sticker = prompt("Enter a custom sticker");
+    if(sticker){
+        commands.shift();
+        commands.unshift(new StickerCommand(0, 0, sticker));
+        cursor = commands[0];
+        unselectButtons();
+        customButton.classList.remove("button");
+        customButton.classList.add("selected-button");
+    }
 });
