@@ -216,6 +216,7 @@ canvas.addEventListener("mouseup", () => {
 
 canvas.addEventListener("mouseleave", () => {
     mouseInScreen = 0;
+    mouseDown = false;
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
 
@@ -321,16 +322,16 @@ customButton.addEventListener("click", () => {
 
 exportButton.addEventListener("click", () => {
     if(context){
-        const temp = document.createElement("canvas");
-        temp.height = 1024;
-        temp.width = 1024;
-        context.scale(4, 4);
-        const tempContext: CanvasRenderingContext2D = temp.getContext("2d")!;
-        for(let i = 1-mouseInScreen; i < commands.length; i++){
+        const tempCanvas = document.createElement("canvas"); 
+        tempCanvas.height = 1024;
+        tempCanvas.width = 1024;
+        const tempContext = tempCanvas.getContext("2d")!;
+        tempContext.scale(4, 4);
+        for(let i = 1; i < commands.length; i++){
             commands[i].display(tempContext);
         }
         const anchor = document.createElement("a");
-        anchor.href = canvas.toDataURL("image/png");
+        anchor.href = tempCanvas.toDataURL("image/png");
         anchor.download = "sketchpad.png";
         anchor.click();
     }
