@@ -67,6 +67,7 @@ exportButton.textContent = "Export";
 app.append(exportButton);
 generateSpacer();
 
+
 // Set up the color sliders
 const rSlider = document.createElement("input");
 const gSlider = document.createElement("input");
@@ -145,6 +146,7 @@ class DrawCommand implements Command{
 
     display(ctx: CanvasRenderingContext2D){
         ctx.save();
+        ctx.beginPath();
         ctx.lineWidth = this.thickness;
         ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 1)`;
         const {x, y} = this.points[0];
@@ -152,7 +154,6 @@ class DrawCommand implements Command{
         for(const {x, y} of this.points){
             ctx.lineTo(x, y);
         }
-        console.log(ctx.lineWidth);
         ctx.stroke();
         ctx.restore();
     }
