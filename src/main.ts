@@ -8,6 +8,7 @@ app.innerHTML = "<h1>Sketchpad</h1>";
 function generateSpacer(): HTMLDivElement {
     const spacer = document.createElement("div");
     spacer.style.marginTop = "15px";
+    app.append(spacer);
     return spacer;
 }   
 
@@ -16,7 +17,7 @@ const canvas = document.createElement("canvas");
 canvas.height = 256;
 canvas.width = 256;
 app.appendChild(canvas);
-app.append(generateSpacer());
+generateSpacer()
 
 // Set up the undo and redo buttons
 const undoButton = document.createElement("button");
@@ -26,8 +27,7 @@ redoButton.textContent = "Redo";
 undoButton.style.marginRight = "10px";
 app.append(undoButton);
 app.append(redoButton);
-app.append(generateSpacer());
-
+generateSpacer()
 
 // Set up the brush buttons
 const thinButton = document.createElement("button");
@@ -39,7 +39,7 @@ thinButton.classList.add("selected-button");
 thinButton.classList.remove("button");
 app.append(thinButton);
 app.append(thickButton);
-app.append(generateSpacer());
+generateSpacer()
 
 // Set up the sticker buttons
 const pumpkinButton = document.createElement("button");
@@ -53,7 +53,7 @@ zombieButton.style.marginLeft = "10px";
 app.append(pumpkinButton); 
 app.append(ghostButton);
 app.append(zombieButton);
-app.append(generateSpacer());
+generateSpacer()
 
 // Set up the custom sticker button
 const customButton = document.createElement("button");
