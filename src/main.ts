@@ -97,6 +97,7 @@ app.append(bSlider);
 const context = canvas.getContext("2d");
 
 let mouseDown = false;
+let isSticker = false;
 const smallThickness = 2;
 const largeThickness = 5;
 let R = 0;
@@ -221,7 +222,7 @@ const redoCommands: Command[] = [];
 let cursor = commands[0];
 
 canvas.addEventListener("mousedown", (e) => {
-    if(cursor.constructor.name === "MouseCommand"){
+    if(!isSticker){
         mouseDown = true;
         commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness, R, G, B));
     }
@@ -237,7 +238,6 @@ canvas.addEventListener("mousedown", (e) => {
             commands.push(new drawStickerCommand(e.offsetX, e.offsetY, (cursor as StickerCommand).sticker, context!));
         }
     }
-    console.log(commands.length);
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -301,6 +301,7 @@ function unselectButtons(){
 
 thinButton.addEventListener("click", () => {
     currentThickness = smallThickness;
+    isSticker = false;
     commands.shift();
     commands.unshift(new MouseCommand(0, 0, currentThickness));
     cursor = commands[0];
@@ -311,6 +312,7 @@ thinButton.addEventListener("click", () => {
 
 thickButton.addEventListener("click", () => {
     currentThickness = largeThickness;
+    isSticker = false;
     commands.shift();
     commands.unshift(new MouseCommand(0, 0, currentThickness));
     cursor = commands[0];
@@ -320,6 +322,7 @@ thickButton.addEventListener("click", () => {
 });
 
 pumpkinButton.addEventListener("click", () => {
+    isSticker = true;
     commands.shift();
     commands.unshift(new StickerCommand(0, 0, "🎃"));
     cursor = commands[0];
@@ -329,6 +332,7 @@ pumpkinButton.addEventListener("click", () => {
 });
 
 ghostButton.addEventListener("click", () => {
+    isSticker = true;
     commands.shift();
     commands.unshift(new StickerCommand(0, 0, "👻"));
     cursor = commands[0];
@@ -338,6 +342,7 @@ ghostButton.addEventListener("click", () => {
 });
 
 zombieButton.addEventListener("click", () => {
+    isSticker = true;
     commands.shift();
     commands.unshift(new StickerCommand(0, 0, "🧟"));
     cursor = commands[0];
@@ -347,6 +352,7 @@ zombieButton.addEventListener("click", () => {
 });
 
 customButton.addEventListener("click", () => {
+    isSticker = true;
     const sticker = prompt("Enter a custom sticker");
     if(sticker){
         commands.shift();
