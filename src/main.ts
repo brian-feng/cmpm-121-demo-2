@@ -61,15 +61,46 @@ customButton.textContent = "Import Custom Goon";
 app.append(customButton);
 generateSpacer();
 
+// Set up the export button
 const exportButton = document.createElement("button");
 exportButton.textContent = "Export";
 app.append(exportButton);
+generateSpacer();
+
+// Set up the color sliders
+const rSlider = document.createElement("input");
+const gSlider = document.createElement("input");
+const bSlider = document.createElement("input");
+rSlider.type = "range";
+gSlider.type = "range";
+bSlider.type = "range";
+rSlider.style.background = "linear-gradient(to right, #FF0000 0%, #FF0000 0%, white 0%, white 100%)";
+gSlider.style.background = "linear-gradient(to right, #00FF00 0%, #00FF00 0%, white 0%, white 100%)";
+bSlider.style.background = "linear-gradient(to right, #0000FF 0%, #0000FF 0%, white 0%, white 100%)";
+rSlider.max = "100";
+rSlider.min = "0";
+rSlider.value = "0";
+gSlider.max = "100";
+gSlider.min = "0";
+gSlider.value = "0";
+bSlider.max = "100";
+bSlider.min = "0";
+bSlider.value = "0";
+app.append(rSlider);
+generateSpacer();
+app.append(gSlider);
+generateSpacer();
+app.append(bSlider);
+
 
 const context = canvas.getContext("2d");
 
 let mouseDown = false;
 const smallThickness = 2;
 const largeThickness = 5;
+let R = 0;
+let G = 0;
+let B = 0;
 let currentThickness = smallThickness;
 let mouseInScreen = 0;
 
@@ -104,21 +135,26 @@ class MouseCommand implements Command{
 class DrawCommand implements Command{
     points: {x: number, y: number}[];
     thickness: number;
+    color: {r: number, g: number, b: number};
 
-    constructor(x: number, y: number, thickness: number){
+    constructor(x: number, y: number, thickness: number, red: number, green: number, blue: number){
         this.points = [{x, y}];
         this.thickness = thickness
+        this.color = {r: red, g: green, b: blue};
     }
 
     display(ctx: CanvasRenderingContext2D){
+        ctx.save();
         ctx.lineWidth = this.thickness;
-        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 1)`;
         const {x, y} = this.points[0];
         ctx.moveTo(x, y);
         for(const {x, y} of this.points){
             ctx.lineTo(x, y);
         }
+        console.log(ctx.lineWidth);
         ctx.stroke();
+        ctx.restore();
     }
 
     drag(x: number, y: number){
@@ -139,7 +175,6 @@ class StickerCommand implements Command {
 
     display(ctx: CanvasRenderingContext2D){
         if (ctx) {
-            console.log(this.x, this.y);
             ctx.font = '30px Arial';
             ctx.fillText(this.sticker, this.x-10, this.y+10);
         }
@@ -187,7 +222,7 @@ let cursor = commands[0];
 canvas.addEventListener("mousedown", (e) => {
     if(cursor.constructor.name === "MouseCommand"){
         mouseDown = true;
-        commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness));
+        commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness, R, G, B));
     }
     else if(cursor.constructor.name === "StickerCommand"){
         let found = false;
@@ -228,7 +263,6 @@ canvas.addEventListener("mouseenter", () => {
 });
 
 canvas.addEventListener("drawing-changed", () => {
-    console.log(mouseInScreen);
     if(context){
         context.clearRect(0, 0, canvas.width, canvas.height);
         for(let i = 1-mouseInScreen; i < commands.length; i++){
@@ -337,4 +371,25 @@ exportButton.addEventListener("click", () => {
         anchor.download = "goonsquad.png";
         anchor.click();
     }
+});
+
+rSlider.addEventListener('input', () => {
+    R = Math.floor(parseInt(rSlider.value) * 2.55);
+    const value = Number(rSlider.value);
+    const gradient = `linear-gradient(to right, #FF0000 0%, #FF0000 ${value}%, white ${value}%, white 100%)`;
+    rSlider.style.background = gradient;
+});
+
+gSlider.addEventListener('input', () => {
+    G = Math.floor(parseInt(gSlider.value) * 2.55);
+    const value = Number(gSlider.value);
+    const gradient = `linear-gradient(to right, #00FF00 0%, #00FF00 ${value}%, white ${value}%, white 100%)`;
+    gSlider.style.background = gradient;
+});
+
+bSlider.addEventListener('input', () => {
+    B = Math.floor(parseInt(bSlider.value) * 2.55);
+    const value = Number(bSlider.value);
+    const gradient = `linear-gradient(to right, #0000FF 0%, #0000FF ${value}%, white ${value}%, white 100%)`;
+    bSlider.style.background = gradient;
 });
