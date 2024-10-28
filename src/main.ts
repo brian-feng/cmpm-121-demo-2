@@ -68,7 +68,9 @@ app.append(exportButton);
 const context = canvas.getContext("2d");
 
 let mouseDown = false;
-let currentThickness = 1;
+const smallThickness = 2;
+const largeThickness = 5;
+let currentThickness = smallThickness;
 let mouseInScreen = 0;
 
 interface Command {
@@ -138,7 +140,7 @@ class StickerCommand implements Command {
     display(ctx: CanvasRenderingContext2D){
         if (ctx) {
             console.log(this.x, this.y);
-            ctx.font = '20px Arial';
+            ctx.font = '30px Arial';
             ctx.fillText(this.sticker, this.x-10, this.y+10);
         }
     }
@@ -164,7 +166,7 @@ class drawStickerCommand implements Command {
 
     display(ctx: CanvasRenderingContext2D){
         if (ctx) {
-            ctx.font = '20px Arial';
+            ctx.font = '30px Arial';
             ctx.fillText(this.sticker, this.x-10, this.y+10);
         }
     }
@@ -262,7 +264,7 @@ function unselectButtons(){
 }
 
 thinButton.addEventListener("click", () => {
-    currentThickness = 1;
+    currentThickness = smallThickness;
     commands.shift();
     commands.unshift(new MouseCommand(0, 0, currentThickness));
     cursor = commands[0];
@@ -272,7 +274,7 @@ thinButton.addEventListener("click", () => {
 });
 
 thickButton.addEventListener("click", () => {
-    currentThickness = 5;
+    currentThickness = largeThickness;
     commands.shift();
     commands.unshift(new MouseCommand(0, 0, currentThickness));
     cursor = commands[0];
