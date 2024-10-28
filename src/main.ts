@@ -237,10 +237,10 @@ canvas.addEventListener("mousedown", (e) => {
             commands.push(new drawStickerCommand(e.offsetX, e.offsetY, (cursor as StickerCommand).sticker, context!));
         }
     }
+    console.log(commands.length);
 });
 
 canvas.addEventListener("mousemove", (e) => {
-    console.log(mouseDown);
     if(mouseDown){
         commands[commands.length-1].drag(e.offsetX, e.offsetY);
     }
