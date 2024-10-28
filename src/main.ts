@@ -228,8 +228,8 @@ canvas.addEventListener("mousedown", (e) => {
     }
     else{
         let found = false;
-        for(let i = 0; i < commands.length; i++){
-            if(commands[i].constructor.name === "drawStickerCommand" && (commands[i] as drawStickerCommand).sticker == (cursor as StickerCommand).sticker){
+        for(let i = 1; i < commands.length; i++){
+            if((commands[i] as drawStickerCommand).sticker == (cursor as StickerCommand).sticker){
                 commands[i].drag(e.offsetX, e.offsetY);
                 found = true;
             }
