@@ -240,6 +240,7 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 canvas.addEventListener("mousemove", (e) => {
+    console.log(mouseDown);
     if(mouseDown){
         commands[commands.length-1].drag(e.offsetX, e.offsetY);
     }
@@ -281,7 +282,7 @@ undoButton.addEventListener("click", () => {
         redoCommands.push(commands.pop()!);
         canvas.dispatchEvent(new Event("drawing-changed"));
     }
-});
+}); 
 
 redoButton.addEventListener("click", () => {
     if(redoCommands.length > 0){
