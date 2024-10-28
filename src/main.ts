@@ -226,7 +226,7 @@ canvas.addEventListener("mousedown", (e) => {
         mouseDown = true;
         commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness, R, G, B));
     }
-    else if(cursor.constructor.name === "StickerCommand"){
+    else{
         let found = false;
         for(let i = 0; i < commands.length; i++){
             if(commands[i].constructor.name === "drawStickerCommand" && (commands[i] as drawStickerCommand).sticker == (cursor as StickerCommand).sticker){
