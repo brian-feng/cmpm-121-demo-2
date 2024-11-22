@@ -30,30 +30,55 @@ app.append(redoButton);
 generateSpacer()
 
 // Set up the brush buttons
-const thinButton = document.createElement("button");
-const thickButton = document.createElement("button");
-thinButton.textContent = "Thin Brush";
-thickButton.textContent = "Thick Brush";
-thickButton.style.marginLeft = "10px";
-thinButton.classList.add("selected-button");
-thinButton.classList.remove("button");
-app.append(thinButton);
-app.append(thickButton);
+const smallThickness = 2;
+const largeThickness = 5;
+let currentThickness = smallThickness;
+class Pen {
+    text: string;
+    button: HTMLButtonElement;
+    thickness: number;
+    constructor (text: string, thickness: number) {
+        this.text = text;
+        this.button = document.createElement("button");
+        this.button.textContent = this.text;
+        this.button.style.marginLeft = "10px";
+        this.thickness = thickness;
+        app.append(this.button);
+    }
+    selectButton() {
+        this.button.classList.add("selected-button");
+        this.button.classList.remove("button");
+    }
+}
+
+const penList: Pen[] = [
+    new Pen("Thin Brush", smallThickness),
+    new Pen("Thick Brush", largeThickness),
+]
+penList[0].button.classList.add("selected-button");
+penList[0].button.classList.remove("button");
 generateSpacer()
 
 // Set up the sticker buttons
-const pumpkinButton = document.createElement("button");
-const ghostButton = document.createElement("button");
-const zombieButton = document.createElement("button")
-pumpkinButton.textContent = "🎃";
-ghostButton.textContent = "👻";
-zombieButton.textContent = "🧟";
-ghostButton.style.marginLeft = "10px";
-zombieButton.style.marginLeft = "10px";
-app.append(pumpkinButton); 
-app.append(ghostButton);
-app.append(zombieButton);
-generateSpacer()
+class Sticker {
+    image: string;
+    button: HTMLButtonElement; 
+    constructor (image: string) {
+        this.image = image;
+        this.button = document.createElement("button");
+        this.button.textContent = this.image;
+        this.button.style.marginLeft = "10px";
+        app.append(this.button);
+    }
+    
+}
+
+const stickerList: Sticker[] = [
+    new Sticker("🎃"),
+    new Sticker("👻"),
+    new Sticker("🧟"),
+]
+generateSpacer();
 
 // Set up the custom sticker button
 const customButton = document.createElement("button");
@@ -88,7 +113,10 @@ class ColorSlider {
 }
 
 const sliderList: ColorSlider[] = 
-    [ new ColorSlider("rSlider", 0, "#FF0000"), new ColorSlider("gSlider", 0, "#00FF00"), new ColorSlider("bSlider", 0, "#0000FF")];
+    [ new ColorSlider("rSlider", 0, "#FF0000"), 
+        new ColorSlider("gSlider", 0, "#00FF00"), 
+        new ColorSlider("bSlider", 0, "#0000FF")
+    ];
 
 for (const colorSlider of sliderList) {
     generateSpacer();
@@ -99,9 +127,6 @@ const context = canvas.getContext("2d");
 
 let mouseDown = false;
 let isSticker = false;
-const smallThickness = 2;
-const largeThickness = 5;
-let currentThickness = smallThickness;
 let mouseInScreen = 0;
 
 interface Command {
@@ -179,7 +204,6 @@ class StickerCommand implements Command {
             ctx.fillText(this.sticker, this.x-10, this.y+10);
         }
     }
-
     drag(x: number, y: number){
         this.x = x;
         this.y = y;
@@ -276,20 +300,21 @@ canvas.addEventListener("tool-moved", () => {
 });
 
 undoButton.addEventListener("click", () => {
-    if(commands.length > 0){
-        redoCommands.push(commands.pop()!);
-        canvas.dispatchEvent(new Event("drawing-changed"));
-    }
+    replaceLatestCommand(commands, redoCommands);
 }); 
 
 redoButton.addEventListener("click", () => {
-    if(redoCommands.length > 0){
-        commands.push(redoCommands.pop()!);
-        canvas.dispatchEvent(new Event("drawing-changed"));
-    }
+    replaceLatestCommand(redoCommands, commands);
 });
 
-const buttons = [thinButton, thickButton, pumpkinButton, ghostButton, zombieButton, customButton];
+function replaceLatestCommand(array: Command[], pushArray: Command[]) {
+    if(array.length > 0){
+        pushArray.push(array.pop()!);
+        canvas.dispatchEvent(new Event("drawing-changed"));
+    }
+}
+
+const buttons = [customButton];
 function unselectButtons(){
     for(const button of buttons){
         button.classList.remove("selected-button");
@@ -297,30 +322,25 @@ function unselectButtons(){
     }
 }
 
-thinButton.addEventListener("click", () => {
-    changeDrawingButton(smallThickness);
-    changeButton(thinButton);
-});
+penList.map((pen) => {
+    buttons.push(pen.button);
+    pen.button.addEventListener("click", () => {
+        changeDrawingButton(pen.thickness);
+    });
+})
 
-thickButton.addEventListener("click", () => {
-    changeDrawingButton(largeThickness);
-    changeButton(thickButton);
-});
+stickerList.map((sticker) => {
+    buttons.push(sticker.button);
+    sticker.button.addEventListener("click", () => {
+        changeSticker(sticker.image);
+    })
+})
 
-pumpkinButton.addEventListener("click", () => {
-    changeSticker("🎃");
-    changeButton(pumpkinButton);
-});
-
-ghostButton.addEventListener("click", () => {
-    changeSticker("👻");
-    changeButton(ghostButton);
-});
-
-zombieButton.addEventListener("click", () => {
-    changeSticker("🧟");
-    changeButton(zombieButton);
-});
+buttons.map((button) => {
+    button.addEventListener("click", () => {
+        changeButton(button);
+    })
+})
 
 customButton.addEventListener("click", () => {
     const sticker = prompt("Enter a custom sticker");
