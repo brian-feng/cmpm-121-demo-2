@@ -69,30 +69,31 @@ generateSpacer();
 
 
 // Set up the color sliders
-const rSlider = document.createElement("input");
-const gSlider = document.createElement("input");
-const bSlider = document.createElement("input");
-rSlider.type = "range";
-gSlider.type = "range";
-bSlider.type = "range";
-rSlider.style.background = "linear-gradient(to right, #FF0000 0%, #FF0000 0%, white 0%, white 100%)";
-gSlider.style.background = "linear-gradient(to right, #00FF00 0%, #00FF00 0%, white 0%, white 100%)";
-bSlider.style.background = "linear-gradient(to right, #0000FF 0%, #0000FF 0%, white 0%, white 100%)";
-rSlider.max = "100";
-rSlider.min = "0";
-rSlider.value = "0";
-gSlider.max = "100";
-gSlider.min = "0";
-gSlider.value = "0";
-bSlider.max = "100";
-bSlider.min = "0";
-bSlider.value = "0";
-app.append(rSlider);
-generateSpacer();
-app.append(gSlider);
-generateSpacer();
-app.append(bSlider);
+class ColorSlider {
+    name: string; 
+    color: number; 
+    slider: HTMLInputElement; 
+    hex: string;
+    constructor(name: string, color: number, hex: string) {
+        this.name = name;
+        this.color = color;
+        this.slider = document.createElement("input");
+        this.slider.type = "range";
+        this.slider.style.background = "linear-gradient(to right, #FF0000 0%, #FF0000 0%, white 0%, white 100%)";
+        this.slider.max = "100";
+        this.slider.min = "0";
+        this.slider.value = "0";
+        this.hex = hex;
+    }
+}
 
+const sliderList: ColorSlider[] = 
+    [ new ColorSlider("rSlider", 0, "#FF0000"), new ColorSlider("gSlider", 0, "#00FF00"), new ColorSlider("bSlider", 0, "#0000FF")];
+
+for (const colorSlider of sliderList) {
+    generateSpacer();
+    app.append(colorSlider.slider);
+}
 
 const context = canvas.getContext("2d");
 
@@ -100,9 +101,6 @@ let mouseDown = false;
 let isSticker = false;
 const smallThickness = 2;
 const largeThickness = 5;
-let R = 0;
-let G = 0;
-let B = 0;
 let currentThickness = smallThickness;
 let mouseInScreen = 0;
 
@@ -224,7 +222,7 @@ let cursor = commands[0];
 canvas.addEventListener("mousedown", (e) => {
     if(!isSticker){
         mouseDown = true;
-        commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness, R, G, B));
+        commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness, sliderList[0].color, sliderList[1].color, sliderList[2].color));
     }
     else{
         let found = false;
@@ -300,69 +298,57 @@ function unselectButtons(){
 }
 
 thinButton.addEventListener("click", () => {
-    currentThickness = smallThickness;
-    isSticker = false;
-    commands.shift();
-    commands.unshift(new MouseCommand(0, 0, currentThickness));
-    cursor = commands[0];
-    unselectButtons();
-    thinButton.classList.remove("button");
-    thinButton.classList.add("selected-button");
+    changeDrawingButton(smallThickness);
+    changeButton(thinButton);
 });
 
 thickButton.addEventListener("click", () => {
-    currentThickness = largeThickness;
-    isSticker = false;
-    commands.shift();
-    commands.unshift(new MouseCommand(0, 0, currentThickness));
-    cursor = commands[0];
-    unselectButtons();
-    thickButton.classList.remove("button");
-    thickButton.classList.add("selected-button");
+    changeDrawingButton(largeThickness);
+    changeButton(thickButton);
 });
 
 pumpkinButton.addEventListener("click", () => {
-    isSticker = true;
-    commands.shift();
-    commands.unshift(new StickerCommand(0, 0, "🎃"));
-    cursor = commands[0];
-    unselectButtons();
-    pumpkinButton.classList.remove("button");
-    pumpkinButton.classList.add("selected-button");
+    changeSticker("🎃");
+    changeButton(pumpkinButton);
 });
 
 ghostButton.addEventListener("click", () => {
-    isSticker = true;
-    commands.shift();
-    commands.unshift(new StickerCommand(0, 0, "👻"));
-    cursor = commands[0];
-    unselectButtons();
-    ghostButton.classList.remove("button");
-    ghostButton.classList.add("selected-button");
+    changeSticker("👻");
+    changeButton(ghostButton);
 });
 
 zombieButton.addEventListener("click", () => {
-    isSticker = true;
-    commands.shift();
-    commands.unshift(new StickerCommand(0, 0, "🧟"));
-    cursor = commands[0];
-    unselectButtons();
-    zombieButton.classList.remove("button");
-    zombieButton.classList.add("selected-button");
+    changeSticker("🧟");
+    changeButton(zombieButton);
 });
 
 customButton.addEventListener("click", () => {
-    isSticker = true;
     const sticker = prompt("Enter a custom sticker");
     if(sticker){
-        commands.shift();
-        commands.unshift(new StickerCommand(0, 0, sticker));
-        cursor = commands[0];
-        unselectButtons();
-        customButton.classList.remove("button");
-        customButton.classList.add("selected-button");
+        changeSticker(sticker);
+        changeButton(customButton);
     }
 });
+
+function changeDrawingButton(thickness: number) {
+    currentThickness = thickness;
+    isSticker = false;
+    commands.shift();
+    commands.unshift(new MouseCommand(0, 0, currentThickness));
+}
+
+function changeButton(button: HTMLButtonElement) {
+    cursor = commands[0];
+    unselectButtons();
+    button.classList.remove("button");
+    button.classList.add("selected-button");
+}
+
+function changeSticker(sticker: string) {
+    isSticker = true;
+    commands.shift();
+    commands.unshift(new StickerCommand(0, 0, sticker));
+}
 
 exportButton.addEventListener("click", () => {
     if(context){
@@ -381,23 +367,11 @@ exportButton.addEventListener("click", () => {
     }
 });
 
-rSlider.addEventListener('input', () => {
-    R = Math.floor(parseInt(rSlider.value) * 2.55);
-    const value = Number(rSlider.value);
-    const gradient = `linear-gradient(to right, #FF0000 0%, #FF0000 ${value}%, white ${value}%, white 100%)`;
-    rSlider.style.background = gradient;
-});
-
-gSlider.addEventListener('input', () => {
-    G = Math.floor(parseInt(gSlider.value) * 2.55);
-    const value = Number(gSlider.value);
-    const gradient = `linear-gradient(to right, #00FF00 0%, #00FF00 ${value}%, white ${value}%, white 100%)`;
-    gSlider.style.background = gradient;
-});
-
-bSlider.addEventListener('input', () => {
-    B = Math.floor(parseInt(bSlider.value) * 2.55);
-    const value = Number(bSlider.value);
-    const gradient = `linear-gradient(to right, #0000FF 0%, #0000FF ${value}%, white ${value}%, white 100%)`;
-    bSlider.style.background = gradient;
-});
+sliderList.map((obj) => {
+    obj.slider.addEventListener('input', () => {
+        obj.color = Math.floor(parseInt(obj.slider.value) * 2.55);
+        const newColor = Number(obj.slider.value);
+        const gradient = `linear-gradient(to right, ${obj.hex} 0%, ${obj.hex} ${newColor}%, white ${newColor}%, white 100%)`;
+        obj.slider.style.background = gradient;
+    })
+})
