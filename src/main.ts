@@ -95,6 +95,10 @@ app.append(bSlider);
 
 
 const context = canvas.getContext("2d");
+if(context){
+    context.fillStyle = "#FFFFFF";
+    context.fillRect(0,0, canvas.width, canvas.height);
+}
 
 let mouseDown = false;
 let isSticker = false;
@@ -267,6 +271,10 @@ canvas.addEventListener("mouseenter", () => {
 canvas.addEventListener("drawing-changed", () => {
     if(context){
         context.clearRect(0, 0, canvas.width, canvas.height);
+
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0,0, canvas.width, canvas.height);
+
         for(let i = 1-mouseInScreen; i < commands.length; i++){
             commands[i].display(context);
         }
