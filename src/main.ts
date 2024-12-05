@@ -29,6 +29,12 @@ app.append(undoButton);
 app.append(redoButton);
 generateSpacer()
 
+// Set up the clear buttons
+const clearButton = document.createElement("button");
+clearButton.textContent = "Clear";
+app.append(clearButton);
+generateSpacer()
+
 // Set up the brush buttons
 const thinButton = document.createElement("button");
 const thickButton = document.createElement("button");
@@ -182,7 +188,9 @@ class StickerCommand implements Command {
     display(ctx: CanvasRenderingContext2D){
         if (ctx) {
             ctx.font = '30px Arial';
+            ctx.strokeStyle = "rgba(0,0,0,1)"
             ctx.fillText(this.sticker, this.x-10, this.y+10);
+            ctx.stroke();
         }
     }
 
@@ -291,6 +299,12 @@ undoButton.addEventListener("click", () => {
         canvas.dispatchEvent(new Event("drawing-changed"));
     }
 }); 
+
+clearButton.addEventListener("click", () => { 
+    redoCommands.push(...commands); 
+    commands.splice(1);
+    canvas.dispatchEvent(new Event("drawing-changed"));
+});
 
 redoButton.addEventListener("click", () => {
     if(redoCommands.length > 0){
