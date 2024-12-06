@@ -110,9 +110,6 @@ let mouseDown = false;
 let isSticker = false;
 const smallThickness = 2;
 const largeThickness = 5;
-let R = 0;
-let G = 0;
-let B = 0;
 let currentThickness = smallThickness;
 let mouseInScreen = 0;
 
@@ -125,17 +122,21 @@ class MouseCommand implements Command{
     x: number;
     y: number;
     thickness: number;
+    color: {r: number, g: number, b: number};
 
-    constructor(x: number, y: number, thickness: number){
+    constructor(x: number, y: number, thickness: number, red: number, green: number, blue: number){
         this.x = x;
         this.y = y;
         this.thickness = thickness;
+        this.color = {r: red, g: green, b: blue};
     }
 
     display(ctx: CanvasRenderingContext2D){
         ctx.beginPath();
+        ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 1)`;
         ctx.arc(this.x, this.y, this.thickness, 0, 2*Math.PI);
         ctx.fill();
+        console.log(ctx.strokeStyle);
     }
 
     drag(x: number, y: number){
@@ -229,9 +230,12 @@ class drawStickerCommand implements Command {
     }
 }
 
-const commands: Command[] = [new MouseCommand(0, 0, currentThickness)];
+const commands: Command[] = [new MouseCommand(0, 0, currentThickness, 0, 0, 0)];
 const redoCommands: Command[] = [];
 let cursor = commands[0];
+let R = 0;
+let G = 0;
+let B = 0;
 
 canvas.addEventListener("mousedown", (e) => {
     if(!isSticker){
@@ -239,22 +243,14 @@ canvas.addEventListener("mousedown", (e) => {
         commands.push(new DrawCommand(e.offsetX, e.offsetY, currentThickness, R, G, B));
     }
     else{
-        let found = false;
-        for(let i = 1; i < commands.length; i++){
-            if((commands[i] as drawStickerCommand).sticker == (cursor as StickerCommand).sticker){
-                commands[i].drag(e.offsetX, e.offsetY);
-                found = true;
-            }
-        }
-        if(!found){
-            commands.push(new drawStickerCommand(e.offsetX, e.offsetY, (cursor as StickerCommand).sticker, context!));
-        }
+        commands.push(new drawStickerCommand(e.offsetX, e.offsetY, (cursor as StickerCommand).sticker, context!));
     }
 });
 
 canvas.addEventListener("mousemove", (e) => {
     if(mouseDown){
         commands[commands.length-1].drag(e.offsetX, e.offsetY);
+        redoCommands.splice(0);
     }
     commands[0].drag(e.offsetX, e.offsetY);
     canvas.dispatchEvent(new Event("tool-moved"));
@@ -301,7 +297,7 @@ undoButton.addEventListener("click", () => {
 }); 
 
 clearButton.addEventListener("click", () => { 
-    redoCommands.push(...commands); 
+    redoCommands.splice(0);    
     commands.splice(1);
     canvas.dispatchEvent(new Event("drawing-changed"));
 });
@@ -321,12 +317,17 @@ function unselectButtons(){
     }
 }
 
+// ONLY USED FOR DRAWINGS, NOT STICKERS
+function updateMouse(){
+    commands.shift();
+    commands.unshift(new MouseCommand(0, 0, currentThickness, R, G, B));
+    cursor = commands[0];
+}
+
 thinButton.addEventListener("click", () => {
     currentThickness = smallThickness;
     isSticker = false;
-    commands.shift();
-    commands.unshift(new MouseCommand(0, 0, currentThickness));
-    cursor = commands[0];
+    updateMouse();
     unselectButtons();
     thinButton.classList.remove("button");
     thinButton.classList.add("selected-button");
@@ -335,9 +336,7 @@ thinButton.addEventListener("click", () => {
 thickButton.addEventListener("click", () => {
     currentThickness = largeThickness;
     isSticker = false;
-    commands.shift();
-    commands.unshift(new MouseCommand(0, 0, currentThickness));
-    cursor = commands[0];
+    updateMouse();
     unselectButtons();
     thickButton.classList.remove("button");
     thickButton.classList.add("selected-button");
@@ -408,6 +407,7 @@ rSlider.addEventListener('input', () => {
     const value = Number(rSlider.value);
     const gradient = `linear-gradient(to right, #FF0000 0%, #FF0000 ${value}%, white ${value}%, white 100%)`;
     rSlider.style.background = gradient;
+    if(!isSticker) updateMouse();
 });
 
 gSlider.addEventListener('input', () => {
@@ -415,6 +415,7 @@ gSlider.addEventListener('input', () => {
     const value = Number(gSlider.value);
     const gradient = `linear-gradient(to right, #00FF00 0%, #00FF00 ${value}%, white ${value}%, white 100%)`;
     gSlider.style.background = gradient;
+    if(!isSticker) updateMouse();
 });
 
 bSlider.addEventListener('input', () => {
@@ -422,4 +423,5 @@ bSlider.addEventListener('input', () => {
     const value = Number(bSlider.value);
     const gradient = `linear-gradient(to right, #0000FF 0%, #0000FF ${value}%, white ${value}%, white 100%)`;
     bSlider.style.background = gradient;
+    if(!isSticker) updateMouse();
 });
