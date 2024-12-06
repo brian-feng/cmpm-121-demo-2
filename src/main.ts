@@ -216,6 +216,7 @@ class drawStickerCommand implements Command {
     display(ctx: CanvasRenderingContext2D){
         if (ctx) {
             ctx.font = '30px Arial';
+            ctx.fillStyle = "rgba(0,0,0,1)"
             ctx.fillText(this.sticker, this.x-10, this.y+10);
         }
     }
@@ -272,6 +273,7 @@ canvas.addEventListener("mouseenter", () => {
 });
 
 canvas.addEventListener("drawing-changed", () => {
+    console.log(commands);
     if(context){
         context.clearRect(0, 0, canvas.width, canvas.height);
 
