@@ -132,11 +132,10 @@ class MouseCommand implements Command{
     }
 
     display(ctx: CanvasRenderingContext2D){
+        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 1)`;
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 1)`;
         ctx.arc(this.x, this.y, this.thickness, 0, 2*Math.PI);
         ctx.fill();
-        console.log(ctx.strokeStyle);
     }
 
     drag(x: number, y: number){
