@@ -188,7 +188,7 @@ class StickerCommand implements Command {
     display(ctx: CanvasRenderingContext2D){
         if (ctx) {
             ctx.font = '30px Arial';
-            ctx.strokeStyle = "rgba(0,0,0,1)"
+            ctx.fillStyle = "rgba(0,0,0,1)"
             ctx.fillText(this.sticker, this.x-10, this.y+10);
             ctx.stroke();
         }
